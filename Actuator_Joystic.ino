@@ -150,7 +150,7 @@ void stop_rotation_motor(byte L_PWM, byte R_PWM, byte LR_Enable) {
 }
 
 void OneClick() {
-  Serial.println("----------Короткое нажатие----------");
+  go_to_open_pos();
   delay(10);
 }
 
