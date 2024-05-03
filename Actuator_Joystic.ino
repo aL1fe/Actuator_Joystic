@@ -1,7 +1,7 @@
 #include "OneButton.h"
 #include <EEPROM.h>
 
-bool debug_mode = 0;      //Режим отладки 1 - включен, 0 - выключен
+bool debug_mode = 1;      //Режим отладки 1 - включен, 0 - выключен
 
 unsigned long last_time;
 
@@ -11,7 +11,7 @@ bool off = 0;                        //off - низкий уровень
 #define open_saved_pos_switch_pin 2  //Переключатель open/saved position 1 - saved, 0 - open
 
 //x-actuator
-#define x_joystic_pin A0                  //Положение джойстика, вход с потенициометра джойстика
+#define x_joystic_pin A0                  //Положение джойстика X, вход с потенициометра джойстика
 #define x_actuator_current_signal_pin A1  //Текущее положение актуатора, вход с потенциометра актуатора
 byte x_L_PWM_pin = 10;                    //Motor rotation counterclockwise L_PWM
 byte x_R_PWM_pin = 11;                    //Motor rotation clockwise R_PWM
@@ -21,10 +21,12 @@ int x_actuator_current_signal;
 int x_actuator_saved_signal = 500;
 
 //y-actuator
-#define y_joystic_pin A2  //Потенциометр джойстика
-// #define back_up 7                        //Motor direction to push(open)
-// #define back_down 8                      //Motor direction to pull(close)
-// #define back_motor 9                     //Motor on/off
+#define y_joystic_pin A6                  //Положение джойстика Y, вход с потенициометра джойстика
+#define y_actuator_current_signal_pin A7  //Текущее положение актуатора, вход с потенциометра актуатора
+byte y_L_PWM_pin = 7;                     //Motor rotation counterclockwise L_PWM
+byte y_R_PWM_pin = 8;                     //Motor rotation clockwise R_PWM
+byte y_enable_motor_pin = 9;              //Motor on/off
+
 
 #define joystic_butt 3
 OneButton Joystic_button(joystic_butt, true);
@@ -49,10 +51,17 @@ void setup() {
   pinMode(x_R_PWM_pin, OUTPUT);
   pinMode(x_enable_motor_pin, OUTPUT);
 
+  //y-actuator setup
+  pinMode(y_joystic_pin, INPUT);
+  pinMode(y_actuator_current_signal_pin, INPUT);
+  pinMode(y_L_PWM_pin, OUTPUT);
+  pinMode(y_R_PWM_pin, OUTPUT);
+  pinMode(y_enable_motor_pin, OUTPUT);
+
+  //joystic setup
   pinMode(x_joystic_pin, INPUT);
   pinMode(y_joystic_pin, INPUT);
   pinMode(joystic_butt, INPUT_PULLUP);
-
   Joystic_button.attachClick(OneClick);
   Joystic_button.attachDoubleClick(DoubleClick);
 }
@@ -156,7 +165,9 @@ void OneClick() {
 
 void DoubleClick() {
   save_new_pos();
-  delay(10);
+  //TODO add Beep on
+  delay(100);
+  //TODO add Beep off
 }
 
 void save_new_pos() {
