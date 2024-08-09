@@ -1,7 +1,7 @@
 #include "OneButton.h"
 #include <EEPROM.h>
 
-bool debug_mode = 1;      //Режим отладки 1 - включен, 0 - выключен
+bool debug_mode = 0;  //Режим отладки 1 - включен, 0 - выключен
 
 unsigned long last_time;
 
@@ -9,6 +9,7 @@ bool isSavedPosition = 0;
 bool on = 1;                         //on - высокий уровень
 bool off = 0;                        //off - низкий уровень
 #define open_saved_pos_switch_pin 2  //Переключатель open/saved position 1 - saved, 0 - open
+#define beeper_pin 13
 
 //x-actuator
 #define x_joystic_pin A0                  //Положение джойстика X, вход с потенициометра джойстика
@@ -43,6 +44,7 @@ void setup() {
   Serial.begin(9600);
 
   pinMode(open_saved_pos_switch_pin, INPUT_PULLUP);
+  pinMode(beeper_pin, OUTPUT);
 
   //x-actuator setup
   pinMode(x_joystic_pin, INPUT);
@@ -159,15 +161,14 @@ void stop_rotation_motor(byte L_PWM, byte R_PWM, byte LR_Enable) {
 }
 
 void OneClick() {
-  go_to_open_pos();
-  delay(10);
+  Beeper(1);
+  isSavedPosition = 0;
+  go_to_saved_pos();  
 }
 
 void DoubleClick() {
-  save_new_pos();
-  //TODO add Beep on
-  delay(100);
-  //TODO add Beep off
+  Beeper(2);
+  save_new_pos();  
 }
 
 void save_new_pos() {
@@ -177,4 +178,13 @@ void save_new_pos() {
   saved_data.y_actuator_saved_pos = 0;  //удалить
 
   EEPROM.put(0, saved_data);  // поместить структуру в EEPROM по адресу 0
+}
+
+void Beeper(byte CountBeep) {
+  for (int i = 0; i < CountBeep; i++) {
+    digitalWrite(beeper_pin, on);
+    delay(100);
+    digitalWrite(beeper_pin, off);
+    delay(100);
+  }
 }
